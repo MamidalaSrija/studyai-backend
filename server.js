@@ -105,13 +105,15 @@ ${notes}
 `);
 
     res.json({ summary });
-  } catch (error) {
-    console.error("Summarizer Error:", error);
+ } catch (error) {
+  console.error("Summarizer Error:", error);
 
-    res.status(500).json({
-      error: "Unable to summarize the notes right now.",
-    });
-  }
+  res.status(500).json({
+    error: "Unable to summarize the notes right now.",
+    details: error.message,
+    status: error.status,
+  });
+}
 });
 
 // Quiz Generator
