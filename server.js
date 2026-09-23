@@ -14,8 +14,9 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
+// AI helper with retry
 async function askAI(prompt) {
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= 5; attempt++) {
     try {
       const response = await ai.models.generateContent({
         model: "gemini-3.6-flash",
@@ -26,11 +27,11 @@ async function askAI(prompt) {
     } catch (error) {
       console.log(`AI attempt ${attempt} failed:`, error.status);
 
-      if (attempt === 3) {
+      if (attempt === 5) {
         throw error;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
     }
   }
 }
