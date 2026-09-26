@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const { GoogleGenAI } = require("@google/genai");
+const OpenAI = require("openai");
 
 dotenv.config();
 
@@ -10,32 +10,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+const ai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,
 });
 
 // AI helper with retry
 async function askAI(prompt) {
-  for (let attempt = 1; attempt <= 5; attempt++) {
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3.6-flash",
-        contents: prompt,
-      });
+  const response = await ai.chat.completions.create({
+    model: "openrouter/free",
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+  });
 
-      return response.text;
-    } catch (error) {
-      console.log(`AI attempt ${attempt} failed:`, error.status);
-
-      if (attempt === 5) {
-        throw error;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-    }
-  }
+  return response.choices[0].message.content;
 }
-
 // Home
 app.get("/", (req, res) => {
   res.json({
